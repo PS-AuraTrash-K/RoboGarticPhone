@@ -1,14 +1,32 @@
 const PLAYER_NAME_STORAGE_KEY = 'gartic-player-name';
 const PLAYER_LOBBY_STORAGE_KEY = 'gartic-player-lobby';
-const lobby = decodeURIComponent(window.location.pathname.split('/').pop() || '').trim();
-const name = localStorage.getItem(PLAYER_NAME_STORAGE_KEY)?.trim() || '';
-const savedLobby = localStorage.getItem(PLAYER_LOBBY_STORAGE_KEY)?.trim() || '';
+const urlParams = new URLSearchParams(window.location.search);
+const queryLobby = urlParams.get('lobby')?.trim() || '';
+const queryName = urlParams.get('name')?.trim() || '';
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+const pathLobby = pathParts[0] === 'lobby' ? decodeURIComponent(pathParts[1] || '').trim() : '';
+
+let lobby = pathLobby || queryLobby;
+let name = localStorage.getItem(PLAYER_NAME_STORAGE_KEY)?.trim() || '';
+let savedLobby = localStorage.getItem(PLAYER_LOBBY_STORAGE_KEY)?.trim() || '';
 
 const playerList = document.querySelector('#player-list');
 const serverLink = document.querySelector('.invite-section > input');
 const copyLinkButton = document.querySelector('.invite-section > button');
 
-serverLink.value = `${window.location.origin}/invite/${encodeURIComponent(lobby || '')}`;
+if (queryName) {
+  localStorage.setItem(PLAYER_NAME_STORAGE_KEY, queryName);
+  name = queryName;
+}
+
+if (queryLobby) {
+  localStorage.setItem(PLAYER_LOBBY_STORAGE_KEY, queryLobby);
+  savedLobby = queryLobby;
+}
+
+if (queryLobby && window.location.pathname === '/Loby/loby.html') {
+  window.location.replace(`/lobby/${encodeURIComponent(queryLobby)}`);
+}
 
 if (!lobby) {
   window.location.replace('/Profile/profile.html');
@@ -17,6 +35,8 @@ if (!lobby) {
 if (!name || savedLobby !== lobby) {
   window.location.replace(`/invite/${encodeURIComponent(lobby)}`);
 }
+
+serverLink.value = `${window.location.origin}/invite/${encodeURIComponent(lobby)}`;
 
 async function copyToClipboard(text) {
   try {
@@ -42,10 +62,6 @@ function createPlayerElement(isCurrentUser, username) {
 }
 
 async function reloadPlayers() {
-  if (!lobby) {
-    return;
-  }
-
   try {
     const response = await fetch('/getAll', {
       method: 'POST',
