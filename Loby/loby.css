@@ -1,0 +1,94 @@
+:root {
+    --bg-color: #3b307d;
+    --panel-bg: #ffffff;
+    --accent-color: #ffcc00;
+    --text-dark: #2c3e50;
+    --player-me: #e1f5fe;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: var(--text-dark);
+    background: linear-gradient(135deg, #cc2b5e 0%, #753a88 100%);
+}
+
+.lobby-container {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    height: 80vh;
+    gap: 20px;
+}
+
+/* Спільні стилі для панелей */
+aside, main {
+    background: var(--panel-bg);
+    border-radius: 20px;
+    box-shadow: 0 10px 0 rgba(0,0,0,0.2);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Панель гравців */
+.players-panel { flex: 1; }
+.player-list { list-style: none; padding: 0; }
+.player {
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #f0f2f5;
+    border-radius: 10px;
+    font-weight: bold;
+}
+.player.me { background: var(--player-me); border: 2px solid #03a9f4; }
+
+/* Центральна частина */
+.settings-panel { 
+    flex: 2; 
+    text-align: center;
+    justify-content: space-between;
+}
+.accent { color: var(--accent-color); text-shadow: 2px 2px #000; }
+
+.game-modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+.mode {
+    padding: 20px;
+    border: 3px solid #eee;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.mode.active {
+    background: var(--accent-color);
+    border-color: #f39c12;
+    transform: scale(1.05);
+}
+
+#start-btn {
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.5rem;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #2e7d32;
+    transition: 0.1s;
+}
+#start-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #2e7d32; }
+
+/* Чат */
+.chat-panel { flex: 1; }
+.chat-messages { flex-grow: 1; overflow-y: auto; background: #fafafa; border-radius: 10px; padding: 10px; }
+.chat-input { display: flex; margin-top: 10px; gap: 5px; }
+.chat-input input { flex: 1; border-radius: 5px; border: 1px solid #ddd; padding: 5px; }

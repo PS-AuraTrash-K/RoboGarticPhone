@@ -1,0 +1,86 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    overflow: hidden;
+    background: #f4f6f9;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* Полотно підлаштовується під залишок простору */
+canvas {
+    flex: 1;
+    min-width: 0; 
+    background: white;
+    cursor: crosshair;
+    display: block;
+}
+
+/* Панель справа завжди 260px */
+.toolbar {
+    width: 260px;
+    flex-shrink: 0; 
+    background: #1e1e2f;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    border-left: 2px solid #2c2c3c;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+}
+
+.toolbar h2 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+button {
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #4c6ef5;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    transition: 0.2s ease;
+}
+
+button:hover {
+    background: #364fc7;
+}
+
+button.active {
+    background: #15aabf;
+    outline: 2px solid white;
+}
+
+label {
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+input[type="color"] {
+    width: 100%;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+    background: none;
+}
+
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+}

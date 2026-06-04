@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Pro Draw Board</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <canvas id="drawingCanvas"></canvas>
+        <div class="toolbar">
+            <div class="tool-grid">
+                <button class="active" onclick="setTool('brush', this)">✏️</button>
+                <button onclick="setTool('eraser', this)">🧼</button>
+                <button onclick="setTool('rect', this)">⬜</button>
+                <button onclick="setTool('circle', this)">⭕</button>
+                <button onclick="setTool('line', this)">📏</button>
+                <button onclick="setTool('fill', this)">🪣</button>
+                <button onclick="undo()">↩️</button>
+                <button onclick="clearCanvas()">🗑</button>
+            </div>
+            <div class="settings">
+                <label>Колір</label>
+                <input type="color" id="colorPicker" value="#000000">
+                <label>Розмір: <span id="sizeVal">5</span></label>
+                <input type="range" id="brushSize" min="1" max="50" value="5">
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

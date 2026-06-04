@@ -1,0 +1,194 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #cc2b5e 0%, #753a88 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+}
+
+.main-container {
+    width: 900px;
+    text-align: center;
+}
+
+.logo img {
+    width: 200px;
+}
+
+.subtitle {
+    font-size: 14px;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+.game-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    display: flex;
+    padding: 30px;
+    gap: 20px;
+}
+
+/* Ліва частина */
+.left-section {
+    flex: 2;
+    background: rgba(121, 33, 134, 0.4);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab {
+    padding: 10px 20px;
+    font-weight: bold;
+    cursor: pointer;
+    opacity: 0.6;
+}
+
+.tab.active {
+    opacity: 1;
+    color: #4dfaae;
+    border-bottom: 3px solid #4dfaae;
+}
+
+.profile-setup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.avatar-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.avatar-bg {
+    background: white;
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 60px;
+    border: 4px solid #4dfaae;
+}
+
+.input-group label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.input-group input {
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    color: white;
+    width: 250px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.start-btn {
+    background: white;
+    color: #333;
+    border: none;
+    padding: 12px 40px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #bbb;
+}
+
+/* Права частина */
+.right-section {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
+    padding: 20px;
+}
+
+.how-to-play h3 {
+    color: #4dfaae;
+    margin-top: 0;
+}
+
+.instruction-img {
+    font-size: 50px;
+    margin: 20px 0;
+}
+
+.instruction-text h4 {
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.instruction-text p {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+.pagination {
+    margin-top: 20px;
+    font-size: 12px;
+}
+
+.refresh-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+
+    background-color: #6c5ce7;
+    color: white;
+    font-size: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.refresh-icon:hover {
+    background-color: #574bdb;
+}
+
+.refresh-icon:active {
+    transform: scale(0.95);
+}
+
+
+
+
+.inputs-row {
+    display: flex;
+    gap: 15px;
+}
+
+.inputs-row .input-group {
+    flex: 1; /* обидва поля однакової ширини */
+}
