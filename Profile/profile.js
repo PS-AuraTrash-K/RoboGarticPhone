@@ -1,6 +1,8 @@
 const startButton = document.querySelector('.start-btn');
 const nameInput = document.querySelector('.shoot');
 const roomInput = document.querySelector('.room_id');
+const roomInputGroup = roomInput.closest('.input-group');
+const profileSetup = document.querySelector('.profile-setup');
 const urlParams = new URLSearchParams(window.location.search);
 const pathParts = window.location.pathname.split('/').filter(Boolean);
 const inviteLobbyFromPath = pathParts[0] === 'invite' ? decodeURIComponent(pathParts[1] || '').trim() : '';
@@ -10,6 +12,23 @@ const PLAYER_LOBBY_STORAGE_KEY = 'gartic-player-lobby';
 
 if (invitedLobby) {
   roomInput.value = invitedLobby;
+  roomInputGroup.style.display = 'none';
+  startButton.textContent = 'ПРИЄДНАТИСЯ';
+
+  const leaveInviteButton = document.createElement('button');
+  leaveInviteButton.type = 'button';
+  leaveInviteButton.textContent = 'ВИЙТИ З ІНВАЙТУ';
+  leaveInviteButton.style.marginTop = '12px';
+  leaveInviteButton.style.width = '100%';
+  leaveInviteButton.style.padding = '12px';
+  leaveInviteButton.style.cursor = 'pointer';
+
+  leaveInviteButton.addEventListener('click', () => {
+    localStorage.removeItem(PLAYER_LOBBY_STORAGE_KEY);
+    window.location.href = '/Profile/profile.html';
+  });
+
+  profileSetup.appendChild(leaveInviteButton);
 }
 
 async function postJson(url, payload) {
