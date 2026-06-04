@@ -2,7 +2,9 @@ const startButton = document.querySelector('.start-btn');
 const nameInput = document.querySelector('.shoot');
 const roomInput = document.querySelector('.room_id');
 const urlParams = new URLSearchParams(window.location.search);
-const invitedLobby = urlParams.get('lobby');
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+const inviteLobbyFromPath = pathParts[0] === 'invite' ? decodeURIComponent(pathParts[1] || '').trim() : '';
+const invitedLobby = inviteLobbyFromPath || urlParams.get('lobby');
 const PLAYER_NAME_STORAGE_KEY = 'gartic-player-name';
 const PLAYER_LOBBY_STORAGE_KEY = 'gartic-player-lobby';
 

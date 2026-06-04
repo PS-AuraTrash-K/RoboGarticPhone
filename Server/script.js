@@ -56,7 +56,12 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname.startsWith('/joinLobby/')) {
-      redirectToProfile(pathname, res);
+      redirectToInvite(pathname, res);
+      return;
+    }
+
+    if (pathname.startsWith('/invite/')) {
+      serveProfilePage(res);
       return;
     }
 
@@ -192,7 +197,7 @@ async function getHash(req, res) {
   sendJson(res, 200, { code: 200, lobby: makeLobbyHash(payload.room_id.trim()) });
 }
 
-function redirectToProfile(pathname, res) {
+function redirectToInvite(pathname, res) {
   const lobbyHash = decodeURIComponent(pathname.split('/').pop() || '').trim();
 
   if (!lobbyHash) {
@@ -201,9 +206,23 @@ function redirectToProfile(pathname, res) {
   }
 
   res.writeHead(302, {
-    Location: `/Profile/profile.html?lobby=${encodeURIComponent(lobbyHash)}`,
+    Location: `/invite/${encodeURIComponent(lobbyHash)}`,
   });
   res.end();
+}
+
+function serveProfilePage(res) {
+  const filePath = path.join(ROOT_DIR, 'Profile', 'profile.html');
+
+  fs.stat(filePath, (statError, stats) => {
+    if (statError || !stats.isFile()) {
+      sendJson(res, 404, { code: 404, message: 'Profile page not found' });
+      return;
+    }
+
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    fs.createReadStream(filePath).pipe(res);
+  });
 }
 
 function serveLobbyPage(res) {

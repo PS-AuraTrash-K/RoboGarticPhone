@@ -8,14 +8,14 @@ const playerList = document.querySelector('#player-list');
 const serverLink = document.querySelector('.invite-section > input');
 const copyLinkButton = document.querySelector('.invite-section > button');
 
-serverLink.value = `${window.location.origin}/joinLobby/${encodeURIComponent(lobby || '')}`;
+serverLink.value = `${window.location.origin}/invite/${encodeURIComponent(lobby || '')}`;
 
 if (!lobby) {
   window.location.replace('/Profile/profile.html');
 }
 
 if (!name || savedLobby !== lobby) {
-  window.location.replace(`/Profile/profile.html?lobby=${encodeURIComponent(lobby)}`);
+  window.location.replace(`/invite/${encodeURIComponent(lobby)}`);
 }
 
 async function copyToClipboard(text) {
