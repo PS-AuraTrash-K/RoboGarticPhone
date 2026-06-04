@@ -127,14 +127,41 @@ function leaveLobbyOnPageExit() {
 
 async function copyToClipboard(text) {
   try {
-    await navigator.clipboard.writeText(text);
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+
+    serverLink.removeAttribute('readonly');
+    serverLink.focus();
+    serverLink.select();
+    serverLink.setSelectionRange(0, serverLink.value.length);
+
+    const copied = document.execCommand('copy');
+
+    serverLink.setAttribute('readonly', 'readonly');
+    serverLink.blur();
+
+    if (!copied) {
+      throw new Error('Copy command failed');
+    }
+
+    return true;
   } catch (error) {
     console.error('Failed to copy text:', error);
+    return false;
   }
 }
 
-copyLinkButton.addEventListener('click', () => {
-  copyToClipboard(serverLink.value);
+copyLinkButton.addEventListener('click', async () => {
+  const originalText = copyLinkButton.textContent;
+  const copied = await copyToClipboard(serverLink.value);
+
+  copyLinkButton.textContent = copied ? 'Скопійовано' : 'Помилка';
+
+  setTimeout(() => {
+    copyLinkButton.textContent = originalText;
+  }, 1200);
 });
 
 window.addEventListener('pagehide', leaveLobbyOnPageExit);
