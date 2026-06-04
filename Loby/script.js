@@ -1,5 +1,8 @@
 const PLAYER_NAME_STORAGE_KEY = 'gartic-player-name';
 const PLAYER_LOBBY_STORAGE_KEY = 'gartic-player-lobby';
+const PRESENCE_INTERVAL_MS = 10000;
+const PLAYERS_REFRESH_INTERVAL_MS = 1000;
+
 const urlParams = new URLSearchParams(window.location.search);
 const queryLobby = urlParams.get('lobby')?.trim() || '';
 const queryName = urlParams.get('name')?.trim() || '';
@@ -9,6 +12,7 @@ const pathLobby = pathParts[0] === 'lobby' ? decodeURIComponent(pathParts[1] || 
 let lobby = pathLobby || queryLobby;
 let name = localStorage.getItem(PLAYER_NAME_STORAGE_KEY)?.trim() || '';
 let savedLobby = localStorage.getItem(PLAYER_LOBBY_STORAGE_KEY)?.trim() || '';
+let leftLobby = false;
 
 const playerList = document.querySelector('#player-list');
 const serverLink = document.querySelector('.invite-section > input');
@@ -38,6 +42,89 @@ if (!name || savedLobby !== lobby) {
 
 serverLink.value = `${window.location.origin}/invite/${encodeURIComponent(lobby)}`;
 
+async function postJson(url, payload) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+    keepalive: true,
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message = data?.message || `Request failed with status ${response.status}`;
+    throw new Error(message);
+  }
+
+  return data;
+}
+
+function sendBeaconJson(url, payload) {
+  if (!navigator.sendBeacon) {
+    return;
+  }
+
+  const blob = new Blob([JSON.stringify(payload)], {
+    type: 'application/json',
+  });
+
+  navigator.sendBeacon(url, blob);
+}
+
+async function ensureLobbyMembership() {
+  await postJson('/join', {
+    lobby,
+    user: name,
+  });
+}
+
+async function sendHeartbeat() {
+  if (leftLobby) {
+    return;
+  }
+
+  try {
+    await postJson('/heartbeat', {
+      lobby,
+      user: name,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function leaveLobby() {
+  if (leftLobby) {
+    return;
+  }
+
+  leftLobby = true;
+
+  try {
+    await postJson('/leave', {
+      lobby,
+      user: name,
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function leaveLobbyOnPageExit() {
+  if (leftLobby) {
+    return;
+  }
+
+  leftLobby = true;
+  sendBeaconJson('/leave', {
+    lobby,
+    user: name,
+  });
+}
+
 async function copyToClipboard(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -49,6 +136,9 @@ async function copyToClipboard(text) {
 copyLinkButton.addEventListener('click', () => {
   copyToClipboard(serverLink.value);
 });
+
+window.addEventListener('pagehide', leaveLobbyOnPageExit);
+window.addEventListener('beforeunload', leaveLobbyOnPageExit);
 
 function createPlayerElement(isCurrentUser, username) {
   const playerItem = document.createElement('li');
@@ -62,22 +152,15 @@ function createPlayerElement(isCurrentUser, username) {
 }
 
 async function reloadPlayers() {
+  if (leftLobby) {
+    return;
+  }
+
   try {
-    const response = await fetch('/getAll', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        lobby,
-      }),
+    const players = await postJson('/getAll', {
+      lobby,
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to load players: ${response.status}`);
-    }
-
-    const players = await response.json();
     playerList.replaceChildren();
 
     players.forEach((username) => {
@@ -88,5 +171,18 @@ async function reloadPlayers() {
   }
 }
 
-reloadPlayers();
-setInterval(reloadPlayers, 1000);
+async function initLobby() {
+  try {
+    await ensureLobbyMembership();
+    await reloadPlayers();
+    setInterval(reloadPlayers, PLAYERS_REFRESH_INTERVAL_MS);
+    setInterval(sendHeartbeat, PRESENCE_INTERVAL_MS);
+  } catch (error) {
+    console.error(error);
+    alert(error.message || 'Не вдалося підключитися до лобі.');
+    await leaveLobby();
+    window.location.replace(`/invite/${encodeURIComponent(lobby)}`);
+  }
+}
+
+initLobby();
