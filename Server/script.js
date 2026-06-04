@@ -60,6 +60,11 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (pathname.startsWith('/lobby/')) {
+      serveLobbyPage(res);
+      return;
+    }
+
     serveStatic(pathname, res);
   } catch (error) {
     console.error(error);
@@ -199,6 +204,20 @@ function redirectToProfile(pathname, res) {
     Location: `/Profile/profile.html?lobby=${encodeURIComponent(lobbyHash)}`,
   });
   res.end();
+}
+
+function serveLobbyPage(res) {
+  const filePath = path.join(ROOT_DIR, 'Loby', 'loby.html');
+
+  fs.stat(filePath, (statError, stats) => {
+    if (statError || !stats.isFile()) {
+      sendJson(res, 404, { code: 404, message: 'Lobby page not found' });
+      return;
+    }
+
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    fs.createReadStream(filePath).pipe(res);
+  });
 }
 
 function serveStatic(pathname, res) {

@@ -3,6 +3,8 @@ const nameInput = document.querySelector('.shoot');
 const roomInput = document.querySelector('.room_id');
 const urlParams = new URLSearchParams(window.location.search);
 const invitedLobby = urlParams.get('lobby');
+const PLAYER_NAME_STORAGE_KEY = 'gartic-player-name';
+const PLAYER_LOBBY_STORAGE_KEY = 'gartic-player-lobby';
 
 if (invitedLobby) {
   roomInput.value = invitedLobby;
@@ -56,7 +58,10 @@ startButton.addEventListener('click', async () => {
       user: username,
     });
 
-    window.location.href = `../Loby/loby.html?name=${encodeURIComponent(username)}&lobby=${encodeURIComponent(lobbyId)}`;
+    localStorage.setItem(PLAYER_NAME_STORAGE_KEY, username);
+    localStorage.setItem(PLAYER_LOBBY_STORAGE_KEY, lobbyId);
+
+    window.location.href = `/lobby/${encodeURIComponent(lobbyId)}`;
   } catch (error) {
     console.error(error);
     alert(error.message || 'Не вдалося підключитися до лобі.');
