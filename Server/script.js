@@ -1,158 +1,229 @@
-const http = require('http')
-const crypto = require('crypto')
+const http = require('http');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
-let users = {};
-/*
-{
-    "HJFfbhlSFGhjfbwlqebSFnf": [
-        "Taras", "Sasha", "Dmytro"
-    ]
-}
-*/
+const HOST = process.env.HOST || '0.0.0.0';
+const PORT = Number(process.env.PORT) || 5000;
+const ROOT_DIR = path.resolve(__dirname, '..');
+const SALT = 'dmytro';
 
+const users = {};
 
-const server = http.createServer((req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    if (req.url == "/createLobby" && req.method == "POST") {
-        createLobby(req, res);
-    } else if (req.url == "/join" && req.method == "POST") {
-        joinToLobby(req, res);
-    } else if (req.url == "/getAll" && req.method == "POST") {
-        getAllUsers(req, res);
-    } else if (req.url == "/getHash" && req.method == "POST") {
-        getHash(req, res);
-    } else if (req.url.startsWith("/joinLobby")) {
-        redirect(req, res)
-    } else {
-        res.end(req.url);
+const MIME_TYPES = {
+  '.css': 'text/css; charset=utf-8',
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'application/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.png': 'image/png',
+  '.svg': 'image/svg+xml; charset=utf-8',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.ico': 'image/x-icon',
+};
+
+const server = http.createServer(async (req, res) => {
+  const requestUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+  const pathname = requestUrl.pathname;
+
+  setCorsHeaders(res);
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  try {
+    if (pathname === '/createLobby' && req.method === 'POST') {
+      await createLobby(req, res);
+      return;
     }
-})
 
-function createLobby(req, res) {
-    let data = ''
-    req.on("data", (chunk) => {
-        data += chunk
-    })
+    if (pathname === '/join' && req.method === 'POST') {
+      await joinToLobby(req, res);
+      return;
+    }
+
+    if (pathname === '/getAll' && req.method === 'POST') {
+      await getAllUsers(req, res);
+      return;
+    }
+
+    if (pathname === '/getHash' && req.method === 'POST') {
+      await getHash(req, res);
+      return;
+    }
+
+    if (pathname.startsWith('/joinLobby/')) {
+      redirectToProfile(pathname, res);
+      return;
+    }
+
+    serveStatic(pathname, res);
+  } catch (error) {
+    console.error(error);
+    sendJson(res, 500, { code: 500, message: 'Internal server error' });
+  }
+});
+
+function setCorsHeaders(res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+}
+
+function sendJson(res, statusCode, payload) {
+  res.writeHead(statusCode, { 'content-type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify(payload));
+}
+
+function makeLobbyHash(roomId) {
+  return crypto.createHash('sha256').update(`${roomId}${SALT}`).digest('hex');
+}
+
+function resolveLobbyId(payload) {
+  if (typeof payload.lobby === 'string' && payload.lobby.trim()) {
+    return payload.lobby.trim();
+  }
+
+  if (typeof payload.room_id === 'string' && payload.room_id.trim()) {
+    return makeLobbyHash(payload.room_id.trim());
+  }
+
+  return null;
+}
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+
+    req.on('data', (chunk) => {
+      data += chunk;
+    });
 
     req.on('end', () => {
-        let json_obj = JSON.parse(data)
-        if (!Object.hasOwn(json_obj, "room_id")) {
-            res.writeHead(400, {'content-type': "application/json"})
-            res.end("{'code':400}")
-            return
-        }
+      if (!data) {
+        resolve({});
+        return;
+      }
 
-        let salt = "dmytro"
-        const hash = crypto.createHash('sha256')
-                    .update(json_obj.room_id + salt)
-                    .digest('hex');
+      try {
+        resolve(JSON.parse(data));
+      } catch (error) {
+        reject(new Error('Invalid JSON body'));
+      }
+    });
 
-        if (Object.hasOwn(users, hash)) {
-            res.end(JSON.stringify(hash))
-            return
-        }
-        
-        users[hash] = [];
-
-        console.log(users);
-
-        res.end(JSON.stringify(hash))
-    })
+    req.on('error', reject);
+  });
 }
 
-function joinToLobby(req, res) {
-    let data = ''
-    req.on("data", (chunk) => {
-        data += chunk
-    })
+async function createLobby(req, res) {
+  const payload = await readBody(req);
 
-    req.on("end", ()=>{
-        let json_obj = JSON.parse(data);
-        if (!Object.hasOwn(json_obj, "room_id") ||
-            !Object.hasOwn(json_obj, "user")) {
-            res.writeHead(400, {'content-type': "application/json"})
-            res.end("{'code':400}")
-            return
-        }
+  if (typeof payload.room_id !== 'string' || !payload.room_id.trim()) {
+    sendJson(res, 400, { code: 400, message: 'room_id is required' });
+    return;
+  }
 
-        let salt = "dmytro"
-        const hash = crypto.createHash('sha256')
-                    .update(json_obj.room_id + salt)
-                    .digest('hex');
+  const hash = makeLobbyHash(payload.room_id.trim());
 
-        if (!Object.hasOwn(users, hash)) {
-            res.writeHead(400, {'content-type': "application/json"})
-            res.end("{'code':400}")
-            return
-        }
+  if (!Object.hasOwn(users, hash)) {
+    users[hash] = [];
+  }
 
-        users[hash].push(json_obj.user)
-
-        let message = {
-            "code": 200
-        }
-
-        res.writeHead(200, {"content-type": "application/json"})
-        res.end(JSON.stringify(message));
-    })
+  sendJson(res, 200, { code: 200, lobby: hash });
 }
 
-function getAllUsers(req, res) {
-    let data = ''
-    req.on("data", (chunk) => {
-        data += chunk
-    })
+async function joinToLobby(req, res) {
+  const payload = await readBody(req);
+  const lobbyId = resolveLobbyId(payload);
 
-    req.on('end', () => {
-        let json_obj = JSON.parse(data)
-        if (!Object.hasOwn(json_obj, "room_id")) {
-            res.writeHead(400, {'content-type': "application/json"})
-            res.end("{'code':400}")
-            return
-        }
+  if (!lobbyId || typeof payload.user !== 'string' || !payload.user.trim()) {
+    sendJson(res, 400, { code: 400, message: 'lobby and user are required' });
+    return;
+  }
 
+  if (!Object.hasOwn(users, lobbyId)) {
+    sendJson(res, 404, { code: 404, message: 'Lobby not found' });
+    return;
+  }
 
-        if (!Object.hasOwn(users, json_obj.room_id)) {
-            res.writeHead(400, {'content-type': "application/json"})
-            res.end("{'code':400}")
-            return
-        }
+  const username = payload.user.trim();
 
-        res.writeHead(200, {'content-type': "application/json"})
-        res.end(JSON.stringify(users[json_obj.room_id]))
-    })
+  if (!users[lobbyId].includes(username)) {
+    users[lobbyId].push(username);
+  }
+
+  sendJson(res, 200, { code: 200, lobby: lobbyId, user: username });
 }
 
-function getHash(req, res) {
-    let data = ''
-    req.on("data", (chunk) => {
-        data += chunk
-    })
+async function getAllUsers(req, res) {
+  const payload = await readBody(req);
+  const lobbyId = resolveLobbyId(payload);
 
-    req.on('end', () => {
-        let json_obj = JSON.parse(data)
-        if (!Object.hasOwn(json_obj, "room_id")) {
-            res.writeHead(400, {'content-type': "application/json"})
-            res.end("{'code':400}")
-            return
-        }
+  if (!lobbyId) {
+    sendJson(res, 400, { code: 400, message: 'lobby is required' });
+    return;
+  }
 
-        let salt = "dmytro"
-        const hash = crypto.createHash('sha256')
-                    .update(json_obj.room_id + salt)
-                    .digest('hex');
-        
-        return hash;
-    })
+  if (!Object.hasOwn(users, lobbyId)) {
+    sendJson(res, 404, { code: 404, message: 'Lobby not found' });
+    return;
+  }
+
+  sendJson(res, 200, users[lobbyId]);
 }
 
-function redirect(req, res) {
-    let lobbyHash = req.url.split("/")
-    lobbyHash = lobbyHash[lobbyHash.length - 1]
+async function getHash(req, res) {
+  const payload = await readBody(req);
 
-    res.writeHead(302, { 'Location': 
-        `file:///C:/Users/Work/Desktop/GarticPhone-main/GarticPhone-main/Profile/profile.html?lobby=${lobbyHash}` });
-    res.end()
+  if (typeof payload.room_id !== 'string' || !payload.room_id.trim()) {
+    sendJson(res, 400, { code: 400, message: 'room_id is required' });
+    return;
+  }
+
+  sendJson(res, 200, { code: 200, lobby: makeLobbyHash(payload.room_id.trim()) });
 }
 
-server.listen(5000);
+function redirectToProfile(pathname, res) {
+  const lobbyHash = decodeURIComponent(pathname.split('/').pop() || '').trim();
+
+  if (!lobbyHash) {
+    sendJson(res, 400, { code: 400, message: 'Lobby hash is required' });
+    return;
+  }
+
+  res.writeHead(302, {
+    Location: `/Profile/profile.html?lobby=${encodeURIComponent(lobbyHash)}`,
+  });
+  res.end();
+}
+
+function serveStatic(pathname, res) {
+  const requestPath = pathname === '/' ? '/Profile/profile.html' : pathname;
+  const normalizedPath = path.normalize(decodeURIComponent(requestPath)).replace(/^(\.\.[/\\])+/, '');
+  const filePath = path.join(ROOT_DIR, normalizedPath);
+
+  if (!filePath.startsWith(ROOT_DIR)) {
+    sendJson(res, 403, { code: 403, message: 'Forbidden' });
+    return;
+  }
+
+  fs.stat(filePath, (statError, stats) => {
+    if (statError || !stats.isFile()) {
+      sendJson(res, 404, { code: 404, message: 'Not found' });
+      return;
+    }
+
+    const contentType = MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
+
+    res.writeHead(200, { 'content-type': contentType });
+    fs.createReadStream(filePath).pipe(res);
+  });
+}
+
+server.listen(PORT, HOST, () => {
+  console.log(`Server running on http://${HOST}:${PORT}`);
+});

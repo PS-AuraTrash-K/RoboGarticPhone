@@ -3,49 +3,65 @@ const urlParams = new URLSearchParams(window.location.search);
 const lobby = urlParams.get('lobby');
 const name = urlParams.get('name');
 
-const player_list = document.querySelector("#player-list")
-const server_link = document.querySelector(".invite-section > input")
+const playerList = document.querySelector('#player-list');
+const serverLink = document.querySelector('.invite-section > input');
+const copyLinkButton = document.querySelector('.invite-section > button');
 
-server_link.value = `http://localhost:5000/joinLobby/${lobby}`
+serverLink.value = `${window.location.origin}/joinLobby/${encodeURIComponent(lobby || '')}`;
 
 async function copyToClipboard(text) {
   try {
     await navigator.clipboard.writeText(text);
-  } catch (err) {
-    console.error('Failed to copy text: ', err);
+  } catch (error) {
+    console.error('Failed to copy text:', error);
   }
 }
 
-const copy_link = document.querySelector(".invite-section > button")
-copy_link.addEventListener("click", function(ev) {
-    copyToClipboard(server_link.value)
-})
+copyLinkButton.addEventListener('click', () => {
+  copyToClipboard(serverLink.value);
+});
 
-function reload_player() {
-    let xhr = new XMLHttpRequest()
-    xhr.open("POST", "http://localhost:5000/getAll")
-    
-    let data = {
-        "room_id": lobby
-    }
+function createPlayerElement(isCurrentUser, username) {
+  const playerItem = document.createElement('li');
+  playerItem.className = `player ${isCurrentUser ? 'me' : ''}`.trim();
 
-    xhr.responseType = 'json'
-    xhr.send(JSON.stringify(data));
+  const icon = document.createElement('span');
+  icon.textContent = '🤡';
+  playerItem.append(icon, username);
 
-    xhr.onload = () => {
-        const json_obj = xhr.response
-        player_list.innerHTML = ""
-        json_obj.forEach(user => {
-            player_list.innerHTML += show_player(user == name, user)
-        });
-    }
-
+  return playerItem;
 }
 
-function show_player(me, name) {
-    return `<li class="player ${me ? "me" : ""}">
-    <span>🤡</span>${name}
-    </li>`
+async function reloadPlayers() {
+  if (!lobby) {
+    return;
+  }
+
+  try {
+    const response = await fetch('/getAll', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        lobby,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load players: ${response.status}`);
+    }
+
+    const players = await response.json();
+    playerList.replaceChildren();
+
+    players.forEach((username) => {
+      playerList.appendChild(createPlayerElement(username === name, username));
+    });
+  } catch (error) {
+    console.error(error);
+  }
 }
 
-setInterval(reload_player, 1000)
+reloadPlayers();
+setInterval(reloadPlayers, 1000);
