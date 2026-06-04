@@ -202,7 +202,13 @@ function redirectToProfile(pathname, res) {
 }
 
 function serveStatic(pathname, res) {
-  const requestPath = pathname === '/' ? '/Profile/profile.html' : pathname;
+  if (pathname === '/') {
+    res.writeHead(302, { Location: '/Profile/profile.html' });
+    res.end();
+    return;
+  }
+
+  const requestPath = pathname;
   const normalizedPath = path.normalize(decodeURIComponent(requestPath)).replace(/^(\.\.[/\\])+/, '');
   const filePath = path.join(ROOT_DIR, normalizedPath);
 
