@@ -191,6 +191,8 @@ async function reloadMessages() {
       lobby,
     });
 
+    console.log(messages)
+
     chat.replaceChildren();
 
     Object.entries(messages).forEach(([key, message]) => {
