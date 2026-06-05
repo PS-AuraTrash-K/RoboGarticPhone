@@ -243,7 +243,7 @@ sendChat.addEventListener('click', (ev) => {
 
   if (mes == "") return;
    try {
-    await postJson('/sendMessage', {
+    postJson('/sendMessage', {
       lobby,
       user: name,
       message: mes
