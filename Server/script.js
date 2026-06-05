@@ -191,7 +191,7 @@ function addOrRefreshUser(lobbyId, username) {
 function lobbyMessage(lobbyId, username, message) {
   const lobby = ensureLobbyRecord(lobbyId);
   lobby.messageCount++;
-  lobby.message[lobby.messageCount] = `<${username}>: ${message}`;
+  lobby.message[lobby.messageCount] = `<strong>${username}</strong>: ${message}`;
   console.log(lobby.message)
 }
 

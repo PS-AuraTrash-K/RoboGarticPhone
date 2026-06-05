@@ -197,7 +197,7 @@ async function reloadMessages() {
 
     for (let i = 0; i < objs.length; i++) {
       let p = document.createElement('p')
-      p.innerHTML = `<p>${objs[i][1]}</p>`
+      p.innerHTML = `${objs[i][1]}`
       chat.appendChild(p);
     }
 
