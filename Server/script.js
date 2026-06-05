@@ -158,6 +158,7 @@ function ensureLobbyRecord(lobbyId) {
   if (!Object.hasOwn(lobbies, lobbyId)) {
     lobbies[lobbyId] = {
       users: {},
+      messageCount: 0,
       message: {},
     };
   }
@@ -186,9 +187,11 @@ function addOrRefreshUser(lobbyId, username) {
   lobby.users[username] = Date.now();
 }
 
+
 function lobbyMessage(lobbyId, username, message) {
   const lobby = ensureLobbyRecord(lobbyId);
-  lobby.message[lobby.message.length] = `<${username}>: ${message}`;
+  lobby.messageCount++;
+  lobby.message[lobby.messageCount] = `<${username}>: ${message}`;
   console.log(lobby.message)
 }
 
