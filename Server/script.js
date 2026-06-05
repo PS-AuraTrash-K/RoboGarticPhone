@@ -56,8 +56,18 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    if (pathname === '/sendMessage' && req.method === 'POST') {
+      await sendMessage(req, res);
+      return;
+    }
+
     if (pathname === '/getAll' && req.method === 'POST') {
       await getAllUsers(req, res);
+      return;
+    }
+    
+    if (pathname === '/getAllMessages' && req.method === 'POST') {
+      await getAllMessages(req, res);
       return;
     }
 
@@ -175,6 +185,11 @@ function addOrRefreshUser(lobbyId, username) {
   lobby.users[username] = Date.now();
 }
 
+function lobbyMessage(lobbyId, username, message) {
+  const lobby = ensureLobbyRecord(lobbyId);
+  lobby.message[lobby.message.length] = `<${username}>: ${message}`;
+}
+
 function removeUser(lobbyId, username) {
   const lobby = getLobbyRecord(lobbyId);
 
@@ -199,6 +214,17 @@ function getActiveUsers(lobbyId) {
   }
 
   return Object.keys(lobby.users);
+}
+
+function getActiveMessages(lobbyId) {
+  cleanupLobbyUsers(lobbyId);
+
+  const lobby = getLobbyRecord(lobbyId);
+  if (!lobby) {
+    return null;
+  }
+
+  return Object.keys(lobby.message);
 }
 
 async function createLobby(req, res) {
@@ -266,6 +292,24 @@ async function heartbeat(req, res) {
   sendJson(res, 200, { code: 200 });
 }
 
+async function sendMessage(req, res) {
+  const payload = await readBody(req);
+  const lobbyId = resolveLobbyId(payload);
+
+  if (!lobbyId || typeof payload.user !== 'string' || !payload.user.trim()) {
+    sendJson(res, 400, { code: 400, message: 'lobby and user are required' });
+    return;
+  }
+
+  if (!getLobbyRecord(lobbyId)) {
+    sendJson(res, 404, { code: 404, message: 'Lobby not found' });
+    return;
+  }
+
+  lobbyMessage(lobbyId, payload.user.trim(), payload.message.trim());
+  sendJson(res, 200, { code: 200 });
+}
+
 async function getAllUsers(req, res) {
   const payload = await readBody(req);
   const lobbyId = resolveLobbyId(payload);
@@ -282,6 +326,24 @@ async function getAllUsers(req, res) {
 
   const activeUsers = getActiveUsers(lobbyId);
   sendJson(res, 200, activeUsers);
+}
+
+async function getAllMessages(req, res) {
+  const payload = await readBody(req);
+  const lobbyId = resolveLobbyId(payload);
+
+  if (!lobbyId) {
+    sendJson(res, 400, { code: 400, message: 'lobby is required' });
+    return;
+  }
+
+  if (!getLobbyRecord(lobbyId)) {
+    sendJson(res, 404, { code: 404, message: 'Lobby not found' });
+    return;
+  }
+
+  const mess = getActiveMessages(lobbyId);
+  sendJson(res, 200, mess);
 }
 
 async function getHash(req, res) {

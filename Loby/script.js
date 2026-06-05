@@ -17,6 +17,9 @@ let leftLobby = false;
 const playerList = document.querySelector('#player-list');
 const serverLink = document.querySelector('.invite-section > input');
 const copyLinkButton = document.querySelector('.invite-section > button');
+const chat = document.querySelector('#chat');
+const inputChat = document.querySelector('.chat-input > input')
+const sendChat = document.querySelector('.chat-input > button')
 
 if (queryName) {
   localStorage.setItem(PLAYER_NAME_STORAGE_KEY, queryName);
@@ -178,6 +181,26 @@ function createPlayerElement(isCurrentUser, username) {
   return playerItem;
 }
 
+async function reloadMessages() {
+  if (leftLobby) {
+    return;
+  }
+
+  try {
+    const messages = await postJson('/getAllMessages', {
+      lobby,
+    });
+
+    chat.replaceChildren();
+
+    messages.forEach((message) => {
+      chat.appendChild(`<p>${message}</p>`);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function reloadPlayers() {
   if (leftLobby) {
     return;
@@ -204,6 +227,7 @@ async function initLobby() {
     await reloadPlayers();
     setInterval(reloadPlayers, PLAYERS_REFRESH_INTERVAL_MS);
     setInterval(sendHeartbeat, PRESENCE_INTERVAL_MS);
+    setInterval(reloadMessages, PLAYERS_REFRESH_INTERVAL_MS);
   } catch (error) {
     console.error(error);
     alert(error.message || 'Не вдалося підключитися до лобі.');
@@ -213,3 +237,18 @@ async function initLobby() {
 }
 
 initLobby();
+
+sendChat.addEventListener('click', (ev) => {
+  let mes = inputChat.value;
+
+  if (mes == "") return;
+   try {
+    await postJson('/sendMessage', {
+      lobby,
+      user: name,
+      message: mes
+    });
+  } catch (error) {
+    console.error(error);
+  }
+})
