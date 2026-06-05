@@ -191,13 +191,16 @@ async function reloadMessages() {
       lobby,
     });
 
-    console.log(Object.entries(messages))
-
     chat.replaceChildren();
 
-    Object.entries(messages).forEach(([key, message]) => {
-      chat.appendChild(`<p>${message}</p>`);
-    });
+    let objs = Object.entries(messages);
+
+    for (let i = 0; i < objs.length; i++) {
+      console.log(objs[i]);
+      console.log(objs[i][1]);
+      chat.appendChild(`<p>${objs[i][1]}</p>`);
+    }
+
   } catch (error) {
     console.error(error);
   }
