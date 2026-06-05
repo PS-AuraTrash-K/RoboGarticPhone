@@ -196,9 +196,9 @@ async function reloadMessages() {
     let objs = Object.entries(messages);
 
     for (let i = 0; i < objs.length; i++) {
-      console.log(objs[i]);
-      console.log(objs[i][1]);
-      chat.appendChild(`<p>${objs[i][1]}</p>`);
+      let p = document.createElement('p')
+      p.innerHTML = `<p>${objs[i][1]}</p>`
+      chat.appendChild(p);
     }
 
   } catch (error) {
