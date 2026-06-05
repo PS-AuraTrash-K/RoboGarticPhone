@@ -1,5 +1,6 @@
 const PLAYER_NAME_STORAGE_KEY = 'gartic-player-name';
 const PLAYER_LOBBY_STORAGE_KEY = 'gartic-player-lobby';
+const PLAYER_AVATAR_STORAGE_KEY = 'gartic-player-avatar';
 const PRESENCE_INTERVAL_MS = 10000;
 const PLAYERS_REFRESH_INTERVAL_MS = 1000;
 
@@ -172,7 +173,14 @@ function createPlayerElement(isCurrentUser, username) {
   playerItem.className = `player ${isCurrentUser ? 'me' : ''}`.trim();
 
   const icon = document.createElement('span');
-  icon.textContent = '🤡';
+
+  if (isCurrentUser) {
+    icon.textContent =
+      localStorage.getItem(PLAYER_AVATAR_STORAGE_KEY) || '👻';
+  } else {
+    icon.textContent = '🤡';
+  }
+
   playerItem.append(icon, username);
 
   return playerItem;
