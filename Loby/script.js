@@ -191,7 +191,7 @@ async function reloadMessages() {
       lobby,
     });
 
-    console.log(messages)
+    console.log(Object.entries(messages))
 
     chat.replaceChildren();
 
