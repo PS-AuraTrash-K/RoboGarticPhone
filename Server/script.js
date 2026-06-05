@@ -189,6 +189,7 @@ function addOrRefreshUser(lobbyId, username) {
 function lobbyMessage(lobbyId, username, message) {
   const lobby = ensureLobbyRecord(lobbyId);
   lobby.message[lobby.message.length] = `<${username}>: ${message}`;
+  console.log(lobby.message)
 }
 
 function removeUser(lobbyId, username) {
@@ -296,7 +297,6 @@ async function heartbeat(req, res) {
 async function sendMessage(req, res) {
   const payload = await readBody(req);
   const lobbyId = resolveLobbyId(payload);
-  console.log("I try")
 
   if (!lobbyId || typeof payload.user !== 'string' || !payload.user.trim()) {
     sendJson(res, 400, { code: 400, message: 'lobby and user are required' });
