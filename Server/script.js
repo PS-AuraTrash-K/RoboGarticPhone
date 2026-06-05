@@ -158,6 +158,7 @@ function ensureLobbyRecord(lobbyId) {
   if (!Object.hasOwn(lobbies, lobbyId)) {
     lobbies[lobbyId] = {
       users: {},
+      message: {},
     };
   }
 
@@ -295,6 +296,7 @@ async function heartbeat(req, res) {
 async function sendMessage(req, res) {
   const payload = await readBody(req);
   const lobbyId = resolveLobbyId(payload);
+  console.log("I try")
 
   if (!lobbyId || typeof payload.user !== 'string' || !payload.user.trim()) {
     sendJson(res, 400, { code: 400, message: 'lobby and user are required' });
