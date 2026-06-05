@@ -193,7 +193,7 @@ async function reloadMessages() {
 
     chat.replaceChildren();
 
-    messages.forEach((message) => {
+    Object.entries(messages).forEach(([key, message]) => {
       chat.appendChild(`<p>${message}</p>`);
     });
   } catch (error) {
