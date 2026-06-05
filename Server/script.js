@@ -229,7 +229,7 @@ function getActiveMessages(lobbyId) {
     return null;
   }
 
-  return Object.keys(lobby.message);
+  return lobby.message;
 }
 
 async function createLobby(req, res) {
