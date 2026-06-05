@@ -248,6 +248,8 @@ sendChat.addEventListener('click', (ev) => {
       user: name,
       message: mes
     });
+
+    inputChat.value = ""
   } catch (error) {
     console.error(error);
   }
