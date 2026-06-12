@@ -49,6 +49,10 @@ if (!name || savedLobby !== lobby) {
 
 serverLink.value = `${window.location.origin}/invite/${encodeURIComponent(lobby)}`;
 
+function start(){
+  window.location.replace('/Drawing/paint.html');
+}
+
 async function postJson(url, payload) {
   const response = await fetch(url, {
     method: 'POST',
