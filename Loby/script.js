@@ -10,6 +10,9 @@ const queryName = urlParams.get('name')?.trim() || '';
 const pathParts = window.location.pathname.split('/').filter(Boolean);
 const pathLobby = pathParts[0] === 'lobby' ? decodeURIComponent(pathParts[1] || '').trim() : '';
 
+let currentAvatar =
+  localStorage.getItem(PLAYER_AVATAR_STORAGE_KEY) || 'X';
+
 let lobby = pathLobby || queryLobby;
 let name = localStorage.getItem(PLAYER_NAME_STORAGE_KEY)?.trim() || '';
 let savedLobby = localStorage.getItem(PLAYER_LOBBY_STORAGE_KEY)?.trim() || '';
@@ -82,6 +85,7 @@ async function ensureLobbyMembership() {
   await postJson('/join', {
     lobby,
     user: name,
+    avatar: currentAvatar
   });
 }
 
