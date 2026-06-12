@@ -11,7 +11,7 @@ const PLAYER_NAME_STORAGE_KEY = 'gartic-player-name';
 const PLAYER_LOBBY_STORAGE_KEY = 'gartic-player-lobby';
 const PLAYER_AVATAR_STORAGE_KEY = 'gartic-player-avatar';
 
-const avatars = ['👻', '🤖', '🦊', '🐱', '🐼', '🐸', '🐵', '🐶', '🐺', '🦁', '🐯', '🐻', '🐹'];
+const avatars = ['👻', '🤖', '🦊', '🐱', '🐼', '🐸', '🐵', '🐶', '🐺', '🦁', '🐯', '🐻', '🐹', '👨🏿‍🦰', '👨‍🦽', '🤓'];
 
 const avatarElement = document.querySelector('.ghost-avatar');
 const refreshButton = document.querySelector('.refresh-icon');
