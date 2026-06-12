@@ -225,7 +225,7 @@ function getActiveUsers(lobbyId) {
   }
 
   return {
-    usernames: Object.keys(lobby.users),
+    usernames: Object.keys(lobby.users.avatars),
     avatars: Object.values(lobby.users.avatars)
   };
 }

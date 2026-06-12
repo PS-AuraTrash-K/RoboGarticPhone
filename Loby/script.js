@@ -231,6 +231,8 @@ async function reloadPlayers() {
     for (let i = 0; i < players.usernames.length; i++) {
       playerList.appendChild(createPlayerElement(players.usernames[i] === name, 
         players.usernames[i], players.avatars[i]));
+
+        console.log(players )
     }
 
   } catch (error) {
