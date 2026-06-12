@@ -94,6 +94,7 @@ async function sendHeartbeat() {
     await postJson('/heartbeat', {
       lobby,
       user: name,
+      avatar: currentAvatar
     });
   } catch (error) {
     console.error(error);
@@ -111,6 +112,7 @@ async function leaveLobby() {
     await postJson('/leave', {
       lobby,
       user: name,
+      avatar: currentAvatar
     });
   } catch (error) {
     console.error(error);
@@ -126,6 +128,7 @@ function leaveLobbyOnPageExit() {
   sendBeaconJson('/leave', {
     lobby,
     user: name,
+    avatar: currentAvatar
   });
 }
 
@@ -171,18 +174,13 @@ copyLinkButton.addEventListener('click', async () => {
 window.addEventListener('pagehide', leaveLobbyOnPageExit);
 window.addEventListener('beforeunload', leaveLobbyOnPageExit);
 
-function createPlayerElement(isCurrentUser, username) {
+function createPlayerElement(isCurrentUser, username, avatar) {
   const playerItem = document.createElement('li');
   playerItem.className = `player ${isCurrentUser ? 'me' : ''}`.trim();
 
   const icon = document.createElement('span');
 
-  if (isCurrentUser) {
-    icon.textContent =
-      localStorage.getItem(PLAYER_AVATAR_STORAGE_KEY) || '👻';
-  } else {
-    icon.textContent = '🤡';
-  }
+  icon.textContent = avatar;
 
   playerItem.append(icon, username);
 
@@ -226,9 +224,11 @@ async function reloadPlayers() {
 
     playerList.replaceChildren();
 
-    players.forEach((username) => {
-      playerList.appendChild(createPlayerElement(username === name, username));
-    });
+    for (let i = 0; i < players.usernames.length; i++) {
+      playerList.appendChild(createPlayerElement(players.usernames[i] === name, 
+        players.usernames[i], players.avatars[i]));
+    }
+
   } catch (error) {
     console.error(error);
   }

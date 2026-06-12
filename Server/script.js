@@ -157,7 +157,10 @@ function getLobbyRecord(lobbyId) {
 function ensureLobbyRecord(lobbyId) {
   if (!Object.hasOwn(lobbies, lobbyId)) {
     lobbies[lobbyId] = {
-      users: {},
+      users: {
+        timeStamp: {},
+        avatars: {},
+      },
       messageCount: 0,
       message: {},
     };
@@ -175,16 +178,18 @@ function cleanupLobbyUsers(lobbyId) {
 
   const now = Date.now();
 
-  Object.entries(lobby.users).forEach(([username, lastSeenAt]) => {
+  Object.entries(lobby.users.timeStamp).forEach(([username, lastSeenAt]) => {
     if (now - lastSeenAt > USER_TTL_MS) {
-      delete lobby.users[username];
+      delete lobby.users.timeStamp[username];
+      delete lobby.users.avatars[username];
     }
   });
 }
 
-function addOrRefreshUser(lobbyId, username) {
+function addOrRefreshUser(lobbyId, username, avatar) {
   const lobby = ensureLobbyRecord(lobbyId);
-  lobby.users[username] = Date.now();
+  lobby.users.timeStamp[username] = Date.now();
+  lobby.users.avatars[username] = avatar;
 }
 
 
@@ -206,7 +211,8 @@ function removeUser(lobbyId, username) {
     return false;
   }
 
-  delete lobby.users[username];
+  delete lobby.users.timeStamp[username];
+  delete lobby.users.avatars[username];
   return true;
 }
 
@@ -218,7 +224,10 @@ function getActiveUsers(lobbyId) {
     return null;
   }
 
-  return Object.keys(lobby.users);
+  return {
+    usernames: Object.keys(lobby.users),
+    avatars: Object.values(lobby.users.avatars)
+  };
 }
 
 function getActiveMessages(lobbyId) {
@@ -261,7 +270,8 @@ async function joinToLobby(req, res) {
   }
 
   const username = payload.user.trim();
-  addOrRefreshUser(lobbyId, username);
+  const avatar = payload.avatar.trim();
+  addOrRefreshUser(lobbyId, username, avatar);
 
   sendJson(res, 200, { code: 200, lobby: lobbyId, user: username });
 }
@@ -293,7 +303,7 @@ async function heartbeat(req, res) {
     return;
   }
 
-  addOrRefreshUser(lobbyId, payload.user.trim());
+  addOrRefreshUser(lobbyId, payload.user.trim(), payload.avatar.trim());
   sendJson(res, 200, { code: 200 });
 }
 

@@ -9,7 +9,6 @@ const inviteLobbyFromPath = pathParts[0] === 'invite' ? decodeURIComponent(pathP
 const invitedLobby = inviteLobbyFromPath || urlParams.get('lobby');
 const PLAYER_NAME_STORAGE_KEY = 'gartic-player-name';
 const PLAYER_LOBBY_STORAGE_KEY = 'gartic-player-lobby';
-
 const PLAYER_AVATAR_STORAGE_KEY = 'gartic-player-avatar';
 
 const avatars = ['👻', '🤖', '🦊', '🐱', '🐼', '🐸', '🐵', '🐶', '🐺', '🦁', '🐯', '🐻', '🐹'];
@@ -102,15 +101,16 @@ startButton.addEventListener('click', async () => {
     await postJson('/join', {
       lobby: lobbyId,
       user: username,
+      avatar: currentAvatar
     });
 
     localStorage.setItem(PLAYER_NAME_STORAGE_KEY, username);
     localStorage.setItem(PLAYER_LOBBY_STORAGE_KEY, lobbyId);
 
     localStorage.setItem(
-  PLAYER_AVATAR_STORAGE_KEY,
-  currentAvatar
-);
+      PLAYER_AVATAR_STORAGE_KEY,
+      currentAvatar
+    );
 
     window.location.href = `/lobby/${encodeURIComponent(lobbyId)}`;
   } catch (error) {
