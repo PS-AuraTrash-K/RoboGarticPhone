@@ -2,6 +2,7 @@ const http = require('http');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { Server } = require("socket.io")
 
 const HOST = process.env.HOST || '0.0.0.0';
 const PORT = Number(process.env.PORT) || 5000;
@@ -448,3 +449,13 @@ setInterval(() => {
 server.listen(PORT, HOST, () => {
   console.log(`Server running on http://${HOST}:${PORT}`);
 });
+
+
+const io = new Server(server)
+
+io.on('connection', (soket) => {
+  console.log('a user connection. id - ' + soket.id)
+  soket.on("new game", ()=>{
+    io.emit("chance")
+  })
+})

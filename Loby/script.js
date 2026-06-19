@@ -4,6 +4,8 @@ const PLAYER_AVATAR_STORAGE_KEY = 'gartic-player-avatar';
 const PRESENCE_INTERVAL_MS = 10000;
 const PLAYERS_REFRESH_INTERVAL_MS = 1000;
 
+const socket = io();
+
 const urlParams = new URLSearchParams(window.location.search);
 const queryLobby = urlParams.get('lobby')?.trim() || '';
 const queryName = urlParams.get('name')?.trim() || '';
@@ -276,4 +278,16 @@ sendChat.addEventListener('click', (ev) => {
   } catch (error) {
     console.error(error);
   }
+})
+
+
+
+const start_button = document.querySelector("#start-btn")
+
+start_button.addEventListener("click", (ev) => {
+  socket.emit('new game')
+})
+
+socket.on("chance", ()=> {
+  window.location.replace(`/Drawing/paint.html`);
 })
