@@ -264,6 +264,18 @@ async function initLobby() {
 initLobby();
 
 sendChat.addEventListener('click', (ev) => {
+  sendMessage();
+})
+
+window.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    sendMessage()
+  }
+})
+
+
+function sendMessage() {
   let mes = inputChat.value;
 
   if (mes == "") return;
@@ -278,8 +290,7 @@ sendChat.addEventListener('click', (ev) => {
   } catch (error) {
     console.error(error);
   }
-})
-
+}
 
 
 const start_button = document.querySelector("#start-btn")
