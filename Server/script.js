@@ -463,7 +463,7 @@ io.on('connection', (soket) => {
   soket.on("game_started", async function(seconds) {
     if (!game_started) {
       game_started = true
-      await new Promise((resolve) => setTimeout(resolve, Seconds * 1000))
+      await new Promise((resolve) => setTimeout(resolve, seconds * 1000))
       io.emit("game_over")
     }
   })
