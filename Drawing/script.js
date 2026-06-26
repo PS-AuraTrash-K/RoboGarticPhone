@@ -178,4 +178,5 @@ const timer_count = setInterval(() => {
 socket.on("game_over", () => {
     clearInterval(timer_count)
     timer.innerHTML = "Goin to next stage"
+    socket.emit("result_image", canvas.toDataURL('image/png'))
 })

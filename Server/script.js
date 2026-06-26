@@ -467,4 +467,8 @@ io.on('connection', (soket) => {
       io.emit("game_over")
     }
   })
+
+  soket.on('result_image', function(url) {
+    console.log(url)
+  })
 })
