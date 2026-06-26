@@ -300,5 +300,9 @@ start_button.addEventListener("click", (ev) => {
 })
 
 socket.on("chance", ()=> {
-  window.location.replace(`/Drawing/paint.html`);
+  window.location.replace(`/Drawing/paint.html?lobby=${encodeURIComponent(lobby)}`);
 })
+
+setInterval(()=> {
+    
+}, 1000)

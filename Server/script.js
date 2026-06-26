@@ -461,7 +461,8 @@ io.on('connection', (soket) => {
     io.emit("chance")
   })
 
-  soket.on("game_started", async function(seconds) {
+  soket.on("game_started", async function(seconds, lobbyId) {
+    soket.emit("set_id", lobbyId)
     if (!game_started) {
       game_started = true
       await new Promise((resolve) => setTimeout(resolve, seconds * 1000))

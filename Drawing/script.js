@@ -7,9 +7,13 @@ const sizeVal = document.getElementById("sizeVal");
 let timer = document.getElementById("timer")
 let seconds = 30
 
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const lobbyId = urlParams.get('lobby');
+
 const socket = io()
 
-socket.emit("game_started", seconds)
+socket.emit("game_started", seconds, lobbyId)
 
 let drawing = false;
 let currentTool = "brush";
@@ -179,4 +183,5 @@ socket.on("game_over", () => {
     clearInterval(timer_count)
     timer.innerHTML = "Goin to next stage"
     socket.emit("result_image", canvas.toDataURL('image/png'))
+    window.location.href = `/lobby/${encodeURIComponent(lobbyId)}`;
 })
