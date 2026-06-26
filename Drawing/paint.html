@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Pro Draw Board</title>
+        <script src="https://cdn.socket.io/4.8.3/socket.io.min.js" integrity="sha384-kzavj5fiMwLKzzD1f8S7TeoVIEi7uKHvbTA3ueZkrzYq75pNQUiUi6Dy98Q3fxb0" crossorigin="anonymous"></script>
+
     <link rel="stylesheet" href="/Drawing/styles.css">
 </head>
 <body>
@@ -24,6 +26,7 @@
                 <input type="color" id="colorPicker" value="#000000">
                 <label>Розмір: <span id="sizeVal">5</span></label>
                 <input type="range" id="brushSize" min="1" max="50" value="5">
+                <div id="timer">0</div>
             </div>
         </div>
     </div>

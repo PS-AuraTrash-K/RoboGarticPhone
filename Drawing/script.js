@@ -4,6 +4,13 @@ const colorPicker = document.getElementById("colorPicker");
 const brushSize = document.getElementById("brushSize");
 const sizeVal = document.getElementById("sizeVal");
 
+let timer = document.getElementById("timer")
+let seconds = 30
+
+const socket = io()
+
+socket.emit("game_started", seconds)
+
 let drawing = false;
 let currentTool = "brush";
 let startX, startY, snapshot;
@@ -162,3 +169,13 @@ window.clearCanvas = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     saveState();
 };
+
+const timer_count = setInterval(() => {
+    seconds--
+    timer.innerHTML = seconds
+}, 1000)
+
+socket.on("game_over", () => {
+    clearInterval(timer_count)
+    timer.innerHTML = "Goin to next stage"
+})

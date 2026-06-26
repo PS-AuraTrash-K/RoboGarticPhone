@@ -452,10 +452,19 @@ server.listen(PORT, HOST, () => {
 
 
 const io = new Server(server)
+let game_started = false
 
 io.on('connection', (soket) => {
   console.log('a user connection. id - ' + soket.id)
   soket.on("new game", ()=>{
     io.emit("chance")
+  })
+
+  soket.on("game_started", async function(seconds) {
+    if (!game_started) {
+      game_started = true
+      await new Promise((resolve) => setTimeout(resolve, Seconds * 1000))
+      io.emit("game_over")
+    }
   })
 })
