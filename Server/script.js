@@ -453,6 +453,7 @@ server.listen(PORT, HOST, () => {
 
 const io = new Server(server)
 let game_started = false
+let counter = 0
 
 io.on('connection', (soket) => {
   console.log('a user connection. id - ' + soket.id)
@@ -469,6 +470,12 @@ io.on('connection', (soket) => {
   })
 
   soket.on('result_image', function(url) {
-    console.log(url)
+    const base64Data = url.split(",")[1];
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    console.log(__dirname)
+
+    fs.writeFileSync(__dirname + "/img/image" 
+                + (counter++) + ".png", buffer)
   })
 })
